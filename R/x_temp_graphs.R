@@ -15,7 +15,7 @@ SMAOColourPalette <- c(
 )
 
 SMAOLabelsTotal <- "Totalt"
-SMAOLabelsNorway <- c("Norge","Norsk","Norske","Norskfødte")
+SMAOLabelsNorway <- c("Norge","Norsk","Norske","Norskf\u00F8dte")
 
 SMAOFormatGGPlot <- function (q, sizeMultiplier = 3, legendKey = 3, xAngle = 0, stripes = TRUE, legendPos="bottom", ncol=3, legendBorder=FALSE, reverse=FALSE)
 {
@@ -210,10 +210,10 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
   plottingData <- data[wk>=max(wk)-52]
 
   if(norwegian){
-    filllabels1=c("Betydelig høyere enn forventet","Høyere enn forventet","Forventet","Lavere enn forventet")
-    filllabels2=c("Høyere enn forventet","Forventet","Lavere enn forventet")
-    colourlabels=c("Foreløpige tall")
-    ylabel="Antall døde per uke\n"
+    filllabels1=c("Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    filllabels2=c("H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    colourlabels=c("Forel\u00F8pige tall")
+    ylabel="Antall d\u00F8de per uke\n"
   } else {
     filllabels1=c("Significantly higher than expected","Higher than expected","Expected","Lower than expected")
     filllabels2=c("Higher than expected","Expected","Lower than expected")
@@ -289,10 +289,10 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
   plottingData <- data[wk>=max(wk)-52*5+1]
 
   if(norwegian){
-    filllabels1=c("Betydelig høyere enn forventet","Høyere enn forventet","Forventet","Lavere enn forventet")
-    filllabels2=c("Høyere enn forventet","Forventet","Lavere enn forventet")
-    colourlabels=c("Foreløpige tall")
-    ylabel="Antall døde per uke\n"
+    filllabels1=c("Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    filllabels2=c("H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    colourlabels=c("Forel\u00F8pige tall")
+    ylabel="Antall d\u00F8de per uke\n"
   } else {
     filllabels1=c("Significantly higher than expected","Higher than expected","Expected","Lower than expected")
     filllabels2=c("Higher than expected","Expected","Lower than expected")
@@ -486,20 +486,20 @@ RunTemporaryGraphs <- function(runName="Norway",masterData,folder=fhi::Dashboard
   } else runList <- "Total"
   for(i in runList){
     if(i=="Total"){
-      title1 <- "Totalt antall døde per uke siste år"
-      title2 <- "Totalt antall døde per uke siste 5 år"
+      title1 <- "Totalt antall d\u00F8de per uke siste \u00E5r"
+      title2 <- "Totalt antall d\u00F8de per uke siste 5 \u00E5r"
     } else if(i=="0to4"){
-      title1 <- "Antall døde (0-4 år) per uke siste år"
-      title2 <- "Antall døde (0-4 år) per uke siste 5 år"
+      title1 <- "Antall d\u00F8de (0-4 \u00E5r) per uke siste \u00E5r"
+      title2 <- "Antall d\u00F8de (0-4 \u00E5r) per uke siste 5 \u00E5r"
     } else if(i=="5to14"){
-      title1 <- "Antall (5-14 år) døde per uke siste år"
-      title2 <- "Antall (5-14 år) døde per uke siste 5 år"
+      title1 <- "Antall (5-14 \u00E5r) d\u00F8de per uke siste \u00E5r"
+      title2 <- "Antall (5-14 \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
     } else if(i=="15to64"){
-      title1 <- "Antall (15-64 år) døde per uke siste år"
-      title2 <- "Antall (15-64 år) døde per uke siste 5 år"
+      title1 <- "Antall (15-64 \u00E5r) d\u00F8de per uke siste \u00E5r"
+      title2 <- "Antall (15-64 \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
     } else if(i=="65P"){
-      title1 <- "Antall (65+ år) døde per uke siste år"
-      title2 <- "Antall (65+ år) døde per uke siste 5 år"
+      title1 <- "Antall (65+ \u00E5r) d\u00F8de per uke siste \u00E5r"
+      title2 <- "Antall (65+ \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
     }
 
     fhi::SMAOpng(paste0(folder,"/",runName,"-",i,"-", yearWeek,".png"))
