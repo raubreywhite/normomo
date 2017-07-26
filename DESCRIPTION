@@ -17,6 +17,7 @@ Imports:
   magrittr,
   lubridate,
   data.table,
+  caTools,
   utils,
   fhi,
   RAWmisc,

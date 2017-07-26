@@ -371,6 +371,8 @@ g_legend<-function(a.gplot){
   legend <- tmp$grobs[[leg]]
   return(legend)}
 
+#' @import data.table
+#' @import caTools
 GraphDelay <- function(data,folder){
   data[,death:=ConvertDate(DoD)]
   data[,reg:=ConvertDate(DoR)]

@@ -3,6 +3,7 @@
 export(EmailNotificationOfNewResults)
 export(RunTemporaryGraphs)
 export(ZipResults)
+import(caTools)
 import(data.table)
 import(stringr)
 importFrom(RAWmisc,MakeFootnote)
