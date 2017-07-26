@@ -4,16 +4,20 @@
 \alias{RunTemporaryGraphs}
 \title{Run Temporary Graphs}
 \usage{
-RunTemporaryGraphs(runName = "Norway",
+RunTemporaryGraphs(runName = "Norway", masterData,
   folder = fhi::DashboardFolder("results", file.path(RAWmisc::YearWeek(),
-  "Graphs")), yearWeek = RAWmisc::YearWeek())
+  "Graphs")), yearWeek = RAWmisc::YearWeek(), dateData = Sys.time())
 }
 \arguments{
 \item{runName}{Name}
 
+\item{masterData}{masterData}
+
 \item{folder}{a}
 
 \item{yearWeek}{a}
+
+\item{dateData}{a}
 }
 \description{
 Running graphs

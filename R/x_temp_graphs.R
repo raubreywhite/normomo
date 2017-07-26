@@ -465,8 +465,10 @@ GraphDelay <- function(data,folder){
 #'
 #' Running graphs
 #' @param runName Name
+#' @param masterData masterData
 #' @param folder a
 #' @param yearWeek a
+#' @param dateData a
 #' @import stringr
 #' @importFrom RAWmisc MakeFootnote
 #' @importFrom fhi SMAOpng
@@ -474,7 +476,7 @@ GraphDelay <- function(data,folder){
 #' @importFrom gridExtra grid.arrange
 #' @importFrom grDevices dev.off
 #' @export RunTemporaryGraphs
-RunTemporaryGraphs <- function(runName="Norway",folder=fhi::DashboardFolder("results",file.path(RAWmisc::YearWeek(),"Graphs")), yearWeek=RAWmisc::YearWeek()){
+RunTemporaryGraphs <- function(runName="Norway",masterData,folder=fhi::DashboardFolder("results",file.path(RAWmisc::YearWeek(),"Graphs")), yearWeek=RAWmisc::YearWeek(), dateData=Sys.time()){
 
   #### NORWEGIAN
 
@@ -501,12 +503,11 @@ RunTemporaryGraphs <- function(runName="Norway",folder=fhi::DashboardFolder("res
     }
 
     fhi::SMAOpng(paste0(folder,"/",runName,"-",i,"-", yearWeek,".png"))
-    data <- readRDS(DashboardFolder("results","data.RDS"))
-    data <- data[GROUP==i]
+    data <- masterData[GROUP==i]
     data <- data[!is.na(excess)]
     storedData[[i]] <- data
     gridExtra::grid.arrange(GraphRecent(data,title=title1), GraphHistoric(data,title=title2), ncol=1)
-    RAWmisc::MakeFootnote(paste("Sist oppdatert: ",strftime(Sys.time(),format="%d/%m/%Y"),sep=""), size=1.5)
+    RAWmisc::MakeFootnote(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""), size=1.5)
     dev.off()
   }
 
