@@ -1,8 +1,13 @@
 language: r
 cache: packages
-
 r_packages:
-    - covr
-
+- covr
+- drat
 after_success:
-    - Rscript -e 'library(covr); codecov()'
+- Rscript -e 'library(covr); codecov()'
+- test $TRAVIS_PULL_REQUEST == "false" && 
+  test $TRAVIS_BRANCH == "master" && 
+  bash deploy.sh
+env:
+  global:
+    secure: mGi/BwBfpoi5SwK9uTROcvqYqhr2MqA9nnVyhA0j2fXYdJHcX+j9icgwwSON54iHsksEQWut7KhKNXFy5G5M7GTr+7ZRfmxXy0ecjRWm7DFk8y59CFvbMMMHBlOp3oWAl9TTo3m4pnLjm+RxIUj2sYPm8I1OJhfLkef0LDLQF8mXhOwhkJl70e8kaiNh1NCuDgvl1QZOH/tK7zKD2pYpepR+TmYywtI4kREAWivHdn1PwBQwAAesLxacz8CjyDuBhWnbXXrLkBzJuak7YJ0/FbKYX8KHqKyZPrAUR2CJ83YSJnGJ87e2QHbUg5mSFWILmaSgapTN7EP5iDo9E4hgPuFXEAWqSc8EKLOu7FljKxwXimbaIhLSGWECfYDdK/7fdj6bYPKAfnXTH2MQrdw5kTLSTIMDBs54xR9TxwBAeUcWSsl9jV024EECG3QzDYPR3cnzoAuix86wGbJ17hTw8v2dE3QJy142n/chm8X6O5JKkf3S3cYEYSU7muixvPouA2Z02wlEReM9Zj0eDB2vFJpO+pJt7DDDCKGZZyMtYC366PseqB/zPyL3fUzIlwit/XCSt2SG3xtdfIIVVLxJK56gqoVB+GIFAUXmQqSwjy0IvwLAgLBvhcDZm4D8ona4bQoFTHDThjmbNWBBUjp0cIENABa4kuDn5tSQs3r9DBs=
