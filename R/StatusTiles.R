@@ -70,5 +70,5 @@ RunStatusTiles <- function(
     q <- q + scale_y_discrete("")
     q <- q + labs(caption=sprintf("Sist oppdatert: %s",strftime(dateData,format="%d/%m/%Y")))
     q <- q + theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust=0.5))
-    RAWmisc::saveA4(q,filename=file.path(folder,springf("Status_tiles-%s.png",dateData)))
+    RAWmisc::saveA4(q,filename=file.path(folder,sprintf("Status_tiles-%s.png",dateData)))
 }
