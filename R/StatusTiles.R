@@ -63,12 +63,12 @@ RunStatusTiles <- function(
                                         labels=c(
                                           "Betydelig h\u00F8yere enn forventet",
                                           "H\u00F8yere enn forventet",
-                                          "Forventet"
+                                          "Forventet/lavere enn forventet"
                                         ))
     q <- q + labs(title="Totalt antall d\u00F8de per uke siste \u00E5r")
     q <- q + scale_x_discrete("\u00C5r-uke")
     q <- q + scale_y_discrete("")
     q <- q + labs(caption=sprintf("Sist oppdatert: %s",strftime(dateData,format="%d/%m/%Y")))
     q <- q + theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust=0.5))
-    RAWmisc::saveA4(q,filename=file.path(folder,"status_tiles.png"))
+    RAWmisc::saveA4(q,filename=file.path(folder,springf("Status_tiles-%s.png",dateData)))
 }

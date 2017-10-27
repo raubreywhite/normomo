@@ -244,7 +244,7 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
-                               values=c("1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#d9ef8b","4lower"="white"),
+                               values=c("1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels1)
     q <- q + scale_colour_manual("",
                                  values=c("Usikkert"="black"),
@@ -273,7 +273,7 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
-                               values=c("2high"="#ffffbf","3expected"="#d9ef8b","4lower"="white"),
+                               values=c("2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels2)
     q <- q + scale_colour_manual("",
                                  values=c("Usikkert"="black"),
@@ -325,7 +325,7 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
-                               values=c("1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#d9ef8b","4lower"="white"),
+                               values=c("1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels1)
     q <- q + scale_colour_manual("",
                                  values=c("Usikkert"="black"),
@@ -354,7 +354,7 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
-                               values=c("2high"="#ffffbf","3expected"="#d9ef8b","4lower"="white"),
+                               values=c("2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels2)
     q <- q + scale_colour_manual("",
                                  values=c("Usikkert"="black"),
