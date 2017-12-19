@@ -37,8 +37,7 @@ RunStatusTiles <- function(
       "Fylke_12"="Hordaland",
       "Fylke_14"="Sogn og Fjordane",
       "Fylke_15"="M\u00F8re og Romsdal",
-      "Fylke_16"="S\u00F8r-Tr\u00F8ndelag",
-      "Fylke_17"="Nord-Tr\u00F8ndelag",
+      "Fylke_50"="Tr\u00F8ndelag",
       "Fylke_18"="Nordland",
       "Fylke_19"="Troms",
       "Fylke_20"="Finnmark"
