@@ -79,7 +79,7 @@ To add or remove people to/from this notification list, send their details to ri
 
   if (isTest) {
     DashboardEmail(
-      emailBCC="normomo_test",
+      "normomo_test",
       emailSubject = sprintf("TESTING EmailSSI [euromomo input] [Norway] [%s]",stringr::str_replace(currentYearWeek,"-"," ")),
       emailText,
       emailAttachFiles=attachFiles,
@@ -91,7 +91,9 @@ To add or remove people to/from this notification list, send their details to ri
       "normomo_ssi",
       emailSubject = sprintf("[euromomo input] [Norway] [%s]",stringr::str_replace(currentYearWeek,"-"," ")),
       emailText,
-      emailAttachFiles=attachFiles
+      emailAttachFiles=attachFiles,
+      emailFooter=FALSE,
+      BCC=FALSE
     )
   }
 }
