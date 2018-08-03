@@ -66,8 +66,9 @@ SMAOFormatGGPlot <- function (q, sizeMultiplier = 3, legendKey = 3, xAngle = 0, 
   q <- q + theme(plot.title = element_text(size = 14 * sizeMultiplier,
                                            hjust = 0.5, vjust = 1))
   q <- q + theme(legend.position=legendPos)
-  q <- q + guides(colour = guide_legend(ncol = ncol, byrow=TRUE, title.position="top", reverse=reverse))
-  q <- q + guides(fill = guide_legend(ncol = ncol, byrow=TRUE, title.position="top", reverse=reverse))
+  q <- q + guides(fill = guide_legend(ncol = ncol, byrow=TRUE, title.position="top", reverse=reverse, order=1))
+  q <- q + guides(colour = guide_legend(ncol = ncol, byrow=TRUE, title.position="top", reverse=reverse, order=2))
+  q <- q + guides(shape = guide_legend(ncol = ncol, byrow=TRUE, title.position="top", reverse=reverse, order=3))
 
   return(q)
 }
@@ -206,18 +207,20 @@ ConvertDate.int <- function(date="01jan2008"){
 
 ConvertDate <- Vectorize(ConvertDate.int)
 
-GraphRecent <- function(data,title="",norwegian=TRUE){
+GraphRecent <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
   plottingData <- data[wk>=max(wk)-52]
 
   if(norwegian){
-    filllabels1=c("Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
-    filllabels2=c("H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
-    colourlabels=c("Forel\u00F8pige tall")
+    filllabels1=c("Prediksjonsintervall","Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    filllabels2=c("Prediksjonsintervall","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    shapelabels=c("Forel\u00F8pige tall")
+    colourlabels=c("Korrigert for forsinkelse","Rapporterte d\u00F8dsfall")
     ylabel="Antall d\u00F8de per uke\n"
   } else {
-    filllabels1=c("Significantly higher than expected","Higher than expected","Expected","Lower than expected")
-    filllabels2=c("Higher than expected","Expected","Lower than expected")
-    colourlabels=c("Preliminary numbers")
+    filllabels1=c("Prediction interval","Significantly higher than expected","Higher than expected","Expected","Lower than expected")
+    filllabels2=c("Prediction interval","Higher than expected","Expected","Lower than expected")
+    shapelabels=c("Preliminary numbers")
+    colourlabels=c("Corrected for delays","Reported deaths")
     ylabel="Deaths per week\n"
   }
 
@@ -227,7 +230,7 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
     plottingData[,Lower:=Pnb-abs(UPIb2-Pnb)]
     plottingData[Lower<0, Lower := 0]
     plottingData[,unstableEstimates:="Stable"]
-    plottingData[wk>=max(wk)-2,unstableEstimates:="Unstable"]
+    plottingData[wk>=max(wk)-7,unstableEstimates:="Unstable"]
 
     breaks <- plottingData[,c("WoDi","YoDi","wk"),with=FALSE]
     breaks <- breaks[seq(1,53,4)]
@@ -238,17 +241,23 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
     q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="3expected"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=UPIb4, fill="2high"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb4,ymax=Inf, fill="1veryhigh"),alpha=0.7)
-    q <- q + geom_line(aes(y=nbc),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,colour="Usikkert"),size=5)
+    q <- q + geom_ribbon(aes(ymin=LPIc,ymax=UPIc, fill="0predinterval"),alpha=0.7)
+    if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
+    q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
-                               values=c("1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
+                               values=c("0predinterval"="#636363","1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels1)
+    q <- q + scale_shape_manual("",
+                                 values=c("Usikkert"=16),
+                                 labels=shapelabels)
     q <- q + scale_colour_manual("",
-                                 values=c("Usikkert"="black"),
+                                 values=c("Korrigert"="black","Rapporterte"="red"),
                                  labels=colourlabels)
+    q
     #q
   } else {
     plottingData[,ymax := max(nbc,UPIb2)]
@@ -256,7 +265,7 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
     plottingData[,Lower:=LCIb-abs(UPIb2-LCIb)]
     plottingData[Lower<0, Lower := 0]
     plottingData[,unstableEstimates:="Stable"]
-    plottingData[wk>=max(wk)-2,unstableEstimates:="Unstable"]
+    plottingData[wk>=max(wk)-7,unstableEstimates:="Unstable"]
 
     breaks <- plottingData[,c("WoDi","YoDi","wk"),with=FALSE]
     breaks <- breaks[seq(1,53,4)]
@@ -267,36 +276,45 @@ GraphRecent <- function(data,title="",norwegian=TRUE){
     q <- q + geom_ribbon(aes(ymin=-Inf,ymax=Lower, fill="4lower"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="3expected"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=Inf, fill="2high"),alpha=0.7)
-    q <- q + geom_line(aes(y=nbc),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,colour="Usikkert"),size=5)
+    q <- q + geom_ribbon(aes(ymin=LPIc,ymax=UPIc, fill="0predinterval"),alpha=0.7)
+    if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
+    q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
-                               values=c("2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
+                               values=c("0predinterval"="#636363","1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels2)
+    q <- q + scale_shape_manual("",
+                                values=c("Usikkert"=16),
+                                labels=shapelabels)
     q <- q + scale_colour_manual("",
-                                 values=c("Usikkert"="black"),
+                                 values=c("Korrigert"="black","Rapporterte"="red"),
                                  labels=colourlabels)
+    #q
   }
+
   q <- SMAOFormatGGPlot(q, legendPos="right", xAngle=90,ncol=1,legendBorder=TRUE)
   #q <- format_plot(q,2,2,stripes=TRUE, xangle=90)
   return(q)
 }
 
 #' @importFrom stats na.omit
-GraphHistoric <- function(data,title="",norwegian=TRUE){
+GraphHistoric <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
   plottingData <- data[wk>=max(wk)-52*5+1]
 
   if(norwegian){
     filllabels1=c("Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
     filllabels2=c("H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
-    colourlabels=c("Forel\u00F8pige tall")
+    shapelabels=c("Forel\u00F8pige tall")
+    colourlabels=c("Korrigert for forsinkelse","Rapporterte d\u00F8dsfall")
     ylabel="Antall d\u00F8de per uke\n"
   } else {
     filllabels1=c("Significantly higher than expected","Higher than expected","Expected","Lower than expected")
     filllabels2=c("Higher than expected","Expected","Lower than expected")
-    colourlabels=c("Preliminary numbers")
+    shapelabels=c("Preliminary numbers")
+    colourlabels=c("Corrected for delays","Reported deaths")
     ylabel="Deaths per week\n"
   }
 
@@ -306,7 +324,7 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
     plottingData[,Lower:=Pnb-abs(UPIb2-Pnb)]
     plottingData[Lower<0, Lower := 0]
     plottingData[,unstableEstimates:="Stable"]
-    plottingData[wk>=max(wk)-2,unstableEstimates:="Unstable"]
+    plottingData[wk>=max(wk)-7,unstableEstimates:="Unstable"]
 
     breaks <- data.frame(plottingData[,c("wk","YoDi"),with=FALSE])
     breaks$YoDi2 <- NA
@@ -319,16 +337,20 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
     q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="3expected"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=UPIb4, fill="2high"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb4,ymax=Inf, fill="1veryhigh"),alpha=0.7)
-    q <- q + geom_line(aes(y=nbc),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,colour="Usikkert"),size=5)
+    if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
+    q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
                                values=c("1veryhigh"="#fc8d59","2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels1)
+    q <- q + scale_shape_manual("",
+                                values=c("Usikkert"=16),
+                                labels=shapelabels)
     q <- q + scale_colour_manual("",
-                                 values=c("Usikkert"="black"),
+                                 values=c("Korrigert"="black","Rapporterte"="red"),
                                  labels=colourlabels)
   } else {
     plottingData[,ymax := max(nbc,UPIb2)]
@@ -336,7 +358,7 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
     plottingData[,Lower:=LCIb-abs(UPIb2-LCIb)]
     plottingData[Lower<0, Lower := 0]
     plottingData[,unstableEstimates:="Stable"]
-    plottingData[wk>=max(wk)-2,unstableEstimates:="Unstable"]
+    plottingData[wk>=max(wk)-7,unstableEstimates:="Unstable"]
 
     breaks <- data.frame(plottingData[,c("wk","YoDi"),with=FALSE])
     breaks$YoDi2 <- NA
@@ -348,16 +370,20 @@ GraphHistoric <- function(data,title="",norwegian=TRUE){
     q <- q + geom_ribbon(aes(ymin=-Inf,ymax=Lower, fill="4lower"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="3expected"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=Inf, fill="2high"),alpha=0.7)
-    q <- q + geom_line(aes(y=nbc),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,colour="Usikkert"),size=5)
+    if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
+    q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
     q <- q + scale_fill_manual("",
                                values=c("2high"="#ffffbf","3expected"="#91bfdb","4lower"="white"),
                                labels=filllabels2)
+    q <- q + scale_shape_manual("",
+                                values=c("Usikkert"=16),
+                                labels=shapelabels)
     q <- q + scale_colour_manual("",
-                                 values=c("Usikkert"="black"),
+                                 values=c("Korrigert"="black","Rapporterte"="red"),
                                  labels=colourlabels)
   }
   q <- SMAOFormatGGPlot(q, legendPos="right", xAngle=90,ncol=1,legendBorder=TRUE)
@@ -504,11 +530,21 @@ RunTemporaryGraphs <- function(runName="Norway",masterData,folder=fhi::Dashboard
       title2 <- "Antall (65+ \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
     }
 
-    fhi::SMAOpng(paste0(folder,"/",runName,"-",i,"-", yearWeek,".png"))
     data <- masterData[GROUP==i]
     data <- data[!is.na(excess)]
     storedData[[i]] <- data
-    gridExtra::grid.arrange(GraphRecent(data,title=title1), GraphHistoric(data,title=title2), ncol=1)
+
+    fhi::SMAOpng(paste0(folder,"/excl_reported_",runName,"-",i,"-", yearWeek,".png"))
+    gridExtra::grid.arrange(
+      GraphRecent(data,title=title1,includeRealDeaths=FALSE),
+      GraphHistoric(data,title=title2,includeRealDeaths=FALSE), ncol=1)
+    RAWmisc::MakeFootnote(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""), size=1.5)
+    dev.off()
+
+    fhi::SMAOpng(paste0(folder,"/incl_reported_",runName,"-",i,"-", yearWeek,".png"))
+    gridExtra::grid.arrange(
+      GraphRecent(data,title=title1,includeRealDeaths=TRUE),
+      GraphHistoric(data,title=title2,includeRealDeaths=FALSE), ncol=1)
     RAWmisc::MakeFootnote(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""), size=1.5)
     dev.off()
   }
