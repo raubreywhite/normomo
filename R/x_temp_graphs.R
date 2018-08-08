@@ -207,7 +207,7 @@ ConvertDate.int <- function(date="01jan2008"){
 
 ConvertDate <- Vectorize(ConvertDate.int)
 
-GraphRecent <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
+xGraphRecent <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
   plottingData <- data[wk>=max(wk)-52]
 
   if(norwegian){
@@ -241,10 +241,10 @@ GraphRecent <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
     q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="3expected"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=UPIb4, fill="2high"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb4,ymax=Inf, fill="1veryhigh"),alpha=0.7)
-    q <- q + geom_ribbon(aes(ymin=LPIc,ymax=UPIc, fill="0predinterval"),alpha=0.7)
+    q <- q + geom_ribbon(aes(ymin=LPIc,ymax=UPIc, fill="0predinterval"),alpha=0.35)
     if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
     q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=4)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
@@ -276,10 +276,10 @@ GraphRecent <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
     q <- q + geom_ribbon(aes(ymin=-Inf,ymax=Lower, fill="4lower"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="3expected"),alpha=0.7)
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=Inf, fill="2high"),alpha=0.7)
-    q <- q + geom_ribbon(aes(ymin=LPIc,ymax=UPIc, fill="0predinterval"),alpha=0.7)
+    q <- q + geom_ribbon(aes(ymin=LPIc,ymax=UPIc, fill="0predinterval"),alpha=0.35)
     if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
     q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=4)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
@@ -301,7 +301,7 @@ GraphRecent <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
 }
 
 #' @importFrom stats na.omit
-GraphHistoric <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
+xGraphHistoric <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
   plottingData <- data[wk>=max(wk)-52*5+1]
 
   if(norwegian){
@@ -339,7 +339,7 @@ GraphHistoric <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
     q <- q + geom_ribbon(aes(ymin=UPIb4,ymax=Inf, fill="1veryhigh"),alpha=0.7)
     if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
     q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=4)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
@@ -372,7 +372,7 @@ GraphHistoric <- function(data,title="",norwegian=TRUE,includeRealDeaths=FALSE){
     q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=Inf, fill="2high"),alpha=0.7)
     if(includeRealDeaths) q <- q + geom_line(aes(y=nb,colour="Rapporterte"),lwd=1)
     q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=1)
-    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=5)
+    q <- q + geom_point(data=plottingData[unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=4)
     q <- q + labs(title=title)
     q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
     q <- q + scale_y_continuous(ylabel)
@@ -504,7 +504,11 @@ GraphDelay <- function(data,folder){
 #' @importFrom gridExtra grid.arrange
 #' @importFrom grDevices dev.off
 #' @export RunTemporaryGraphs
-RunTemporaryGraphs <- function(runName="Norway",masterData,folder=fhi::DashboardFolder("results",file.path(RAWmisc::YearWeek(),"Graphs")), yearWeek=RAWmisc::YearWeek(), dateData=Sys.time()){
+RunTemporaryGraphs <- function(runName="Norway",
+                               masterData,
+                               folder=fhi::DashboardFolder("results",file.path(RAWmisc::YearWeek(),"Graphs")),
+                               yearWeek=RAWmisc::YearWeek(),
+                               dateData=Sys.time()){
 
   #### NORWEGIAN
 
@@ -536,15 +540,15 @@ RunTemporaryGraphs <- function(runName="Norway",masterData,folder=fhi::Dashboard
 
     fhi::SMAOpng(paste0(folder,"/excl_reported_",runName,"-",i,"-", yearWeek,".png"))
     gridExtra::grid.arrange(
-      GraphRecent(data,title=title1,includeRealDeaths=FALSE),
-      GraphHistoric(data,title=title2,includeRealDeaths=FALSE), ncol=1)
+      xGraphRecent(data,title=title1,includeRealDeaths=FALSE),
+      xGraphHistoric(data,title=title2,includeRealDeaths=FALSE), ncol=1)
     RAWmisc::MakeFootnote(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""), size=1.5)
     dev.off()
 
     fhi::SMAOpng(paste0(folder,"/incl_reported_",runName,"-",i,"-", yearWeek,".png"))
     gridExtra::grid.arrange(
-      GraphRecent(data,title=title1,includeRealDeaths=TRUE),
-      GraphHistoric(data,title=title2,includeRealDeaths=FALSE), ncol=1)
+      xGraphRecent(data,title=title1,includeRealDeaths=TRUE),
+      xGraphHistoric(data,title=title2,includeRealDeaths=FALSE), ncol=1)
     RAWmisc::MakeFootnote(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""), size=1.5)
     dev.off()
   }

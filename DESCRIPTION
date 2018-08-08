@@ -24,7 +24,8 @@ Imports:
   gridExtra,
   grDevices,
   stats,
-  zip
+  zip,
+  openxlsx
 Suggests:
   testthat
 Remotes: raubreywhite/RAWmisc, raubreywhite/fhi, raubreywhite/MOMOpack-for-R
