@@ -67,7 +67,7 @@ GenerateStack <- function(
   stack$dateDataMinusOneWeek <- dateDataMinusOneWeek
   stack$dateData <- vector("list",length=nrow(stack))
   stack$dateData[[1]] <- c(dateData-seq(4*52*7,0,by=-7))
-  for(i in 2:nrow(stack)) stack$dateData[[i]] <- dateData
+  for(i in 1:nrow(stack)) stack$dateData[[i]] <- dateData
 
   tmp <- list(
     list(
