@@ -17,12 +17,17 @@ SetupFolders <- function(
   dir.create(file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "Graphs_old_style"))
+    "graphs_delete_unreliable"))
 
   dir.create(file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "Graphs_new_style"))
+    "graphs_with_unreliable"))
+
+  dir.create(file.path(
+    folder_results,
+    RAWmisc::YearWeek(dateDataMinusOneWeek),
+    "graphs_statistics"))
 
   dir.create(file.path(
     folder_results,
@@ -32,5 +37,5 @@ SetupFolders <- function(
   dir.create(file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "Data"))
+    "data"))
 }

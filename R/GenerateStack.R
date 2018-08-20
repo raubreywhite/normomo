@@ -41,25 +41,33 @@ GenerateStack <- function(
   stack$MOMOFolderResultsData <- file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "Data",
+    "data",
     paste0(stack$runName,".RDS")
   )
 
-  stack$MOMOFolderResultsGraphsOldStyle <- file.path(
+  stack$MOMOFolderResultsGraphsDeleteUnreliable <- file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "Graphs_old_style"
+    "graphs_delete_unreliable"
   )
 
-  stack$MOMOFolderResultsGraphsNewStyle <- file.path(
+  stack$MOMOFolderResultsGraphsWithUnreliable <- file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "Graphs_new_style"
+    "graphs_with_unreliable"
+  )
+
+  stack$MOMOFolderResultsGraphsStatistics <- file.path(
+    folder_results,
+    RAWmisc::YearWeek(dateDataMinusOneWeek),
+    "graphs_statistics"
   )
 
   stack$MOMOYsum <- RAWmisc:::YearN(dateDataMinusOneWeek)
   stack$dateDataMinusOneWeek <- dateDataMinusOneWeek
-  stack$dateData <- dateData
+  stack$dateData <- vector("list",length=nrow(stack))
+  stack$dateData[[1]] <- c(dateData-seq(4*52*7,0,by=-7))
+  for(i in 2:nrow(stack)) stack$dateData[[i]] <- dateData
 
   tmp <- list(
     list(

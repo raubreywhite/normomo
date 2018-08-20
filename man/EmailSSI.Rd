@@ -4,10 +4,12 @@
 \alias{EmailSSI}
 \title{blah}
 \usage{
-EmailSSI(folderResultsYearWeek, isTest = TRUE)
+EmailSSI(folderResultsYearWeek, dateReliable, isTest = TRUE)
 }
 \arguments{
 \item{folderResultsYearWeek}{a}
+
+\item{dateReliable}{a}
 
 \item{isTest}{a}
 }

@@ -47,10 +47,11 @@ EmailInternal <- function(folderResultsYearWeek, isTest = TRUE){
 
 #' blah
 #' @param folderResultsYearWeek a
+#' @param dateReliable a
 #' @param isTest a
 #' @importFrom fhi DashboardEmail
 #' @export EmailSSI
-EmailSSI <- function(folderResultsYearWeek, isTest = TRUE){
+EmailSSI <- function(folderResultsYearWeek, dateReliable, isTest = TRUE){
 
   currentYearWeek <- stringr::str_extract(folderResultsYearWeek,"[0-9]*-[0-9]*")
 
@@ -64,10 +65,16 @@ EmailSSI <- function(folderResultsYearWeek, isTest = TRUE){
 
   attachFiles <- file.path(folderResultsYearWeek,"MOMO",folderNorway1,folderNorway2,files)
 
-  emailText <- "
+  reliableData <- tempfile()
+  x <- fread(attachFiles)
+  x <- x[wk2<=RAWmisc::YearWeek(dateReliable)]
+  fwrite(x,reliableData)
+
+  emailText <- sprintf("
 <html><body>
 Dear EuroMOMO hub,<br><br>
 Please find attached the current week's results.<br><br>
+Please note that only data up to and including week %s is included, as data beyond this is not reliable.<br><br>
 Sincerely,<br>
 Norway<br><br><br>
 ------------------------
@@ -75,14 +82,14 @@ Norway<br><br><br>
 DO NOT REPLY TO THIS EMAIL! This email address is not checked by anyone!
 <br>
 To add or remove people to/from this notification list, send their details to richardaubrey.white@fhi.no
-</body></html>"
+</body></html>",RAWmisc::YearWeek(dateReliable))
 
   if (isTest) {
     DashboardEmail(
       "normomo_test",
       emailSubject = sprintf("TESTING EmailSSI [euromomo input] [Norway] [%s]",stringr::str_replace(currentYearWeek,"-"," ")),
       emailText,
-      emailAttachFiles=attachFiles,
+      emailAttachFiles=reliableData,
       emailFooter=FALSE,
       BCC=FALSE
     )
@@ -91,7 +98,7 @@ To add or remove people to/from this notification list, send their details to ri
       "normomo_ssi",
       emailSubject = sprintf("[euromomo input] [Norway] [%s]",stringr::str_replace(currentYearWeek,"-"," ")),
       emailText,
-      emailAttachFiles=attachFiles,
+      emailAttachFiles=reliableData,
       emailFooter=FALSE,
       BCC=FALSE
     )

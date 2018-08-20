@@ -23,6 +23,7 @@ CleanExportedMOMOData <- function(
 
   data <- data[,c("GROUP","wk","wk2","YoDi","WoDi","Pnb","nb","nbc","UPIb2","UPIb4","UPIc","LPIc","UCIc","LCIc","zscore"),with=F]
   data[,id:=paste0(GROUP,wk,wk2)]
+  data[,wk2:=as.character(wk2)]
 
   if(s[["runName"]]=="Norway"){
     if(file.exists(file.path(folder_results,"censoring.RDS"))){
