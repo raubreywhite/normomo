@@ -65,7 +65,7 @@ EmailSSI <- function(folderResultsYearWeek, dateReliable, isTest = TRUE){
 
   attachFiles <- file.path(folderResultsYearWeek,"MOMO",folderNorway1,folderNorway2,files)
 
-  reliableData <- tempfile()
+  reliableData <- file.path(tempdir(),files)
   x <- fread(attachFiles)
   x <- x[wk2<=RAWmisc::YearWeek(dateReliable)]
   fwrite(x,reliableData)
@@ -85,7 +85,7 @@ To add or remove people to/from this notification list, send their details to ri
 </body></html>",RAWmisc::YearWeek(dateReliable))
 
   if (isTest) {
-    DashboardEmail(
+    fhi::DashboardEmail(
       "normomo_test",
       emailSubject = sprintf("TESTING EmailSSI [euromomo input] [Norway] [%s]",stringr::str_replace(currentYearWeek,"-"," ")),
       emailText,
