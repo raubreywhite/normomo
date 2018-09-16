@@ -4,7 +4,7 @@
 \alias{RunGraphsDeaths}
 \title{Running graphs}
 \usage{
-RunGraphsDeaths(runName = "Norway", data, allPlotData,
+RunGraphsDeaths(runName = "Norway", data,
   folder = fhi::DashboardFolder("results", file.path(RAWmisc::YearWeek(),
   "Graphs")), yearWeek = RAWmisc::YearWeek(), dateData = Sys.time(),
   dateReliable = RAWmisc::YearWeek())
@@ -13,8 +13,6 @@ RunGraphsDeaths(runName = "Norway", data, allPlotData,
 \item{runName}{Name}
 
 \item{data}{data}
-
-\item{allPlotData}{allPlotData}
 
 \item{folder}{a}
 

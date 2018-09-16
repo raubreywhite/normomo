@@ -37,7 +37,7 @@ CleanExportedMOMOData <- function(
     data[,nbc:=fhi::Censor(n=nbc,randomNoise=randomNoise,boundaries=list(data$UPIb2,data$UPIb4))]
     data[,nb:=fhi::Censor(n=nb,randomNoise=randomNoise,boundaries=list(data$UPIb2,data$UPIb4))]
   }
-  minCorrectedWeek <- min(data[!is.na(UPIc)]$wk)
+  minCorrectedWeek <- min(data[nbc!=nb]$wk)
 
   # prediction interval
   data[is.na(UPIc) | UPIc < nbc,UPIc:=nbc]
@@ -51,6 +51,10 @@ CleanExportedMOMOData <- function(
 
   # prediction interval cant be below the real value!
   data[is.na(LPIc) | LPIc < nb,LPIc:=nb]
+
+  # remove prediction intervals before correction
+  data[wk < minCorrectedWeek,UPIc:=nbc]
+  data[wk < minCorrectedWeek,LPIc:=nbc]
 
 
   data[,excess:=nbc-Pnb]

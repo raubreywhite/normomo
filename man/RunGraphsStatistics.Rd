@@ -4,14 +4,12 @@
 \alias{RunGraphsStatistics}
 \title{Running graphs}
 \usage{
-RunGraphsStatistics(runName = "Norway", data, allPlotData,
+RunGraphsStatistics(runName = "Norway", allPlotData,
   folder = fhi::DashboardFolder("results", file.path(RAWmisc::YearWeek(),
   "Graphs")), yearWeek = RAWmisc::YearWeek(), dateData = Sys.time())
 }
 \arguments{
 \item{runName}{Name}
-
-\item{data}{data}
 
 \item{allPlotData}{allPlotData}
 

@@ -177,14 +177,6 @@ GraphBias1 <- function(plotData,titleBias){
   breaks <- breaks[seq(1,53,2)]
   breaks[, label := paste(gsub(" ","0",format(WoDi,width=2)),"/",YoDi,sep="")]
 
-  plottingData[DoA==max(DoA),true_nbc:=nbc]
-  plottingData[,true_nbc:=mean(true_nbc,na.rm=T),by=.(wk)]
-  plottingData[wk>=max(wk)-2,true_nbc:=NA]
-  plottingData[,max_wk:=max(wk,na.rm=T),by=.(DoA)]
-  plottingData[,lag:=max_wk-wk]
-  plottingData[,nbc_bias:=nbc-true_nbc]
-  plottingData[nbc==0 & true_nbc>10,nbc_bias:=NA]
-
   q <- ggplot(plottingData[lag<=7],aes(x=factor(lag),y=nbc_bias))
   q <- q + geom_boxplot()
   q <- q + scale_x_discrete("Lag")
@@ -196,19 +188,11 @@ GraphBias1 <- function(plotData,titleBias){
 }
 
 GraphBias2 <- function(plotData,titleBias){
-  plottingData <- plotData[wk>=max(wk)-52*2]
+  plottingData <- plotData[wk>=max(wk)-52*4]
 
   breaks <- unique(plottingData[,c("WoDi","YoDi","wk"),with=FALSE])
   breaks <- breaks[seq(1,nrow(breaks),4)]
   breaks[, label := paste(gsub(" ","0",format(WoDi,width=2)),"/",YoDi,sep="")]
-
-  plottingData[DoA==max(DoA),true_nbc:=nbc]
-  plottingData[,true_nbc:=mean(true_nbc,na.rm=T),by=.(wk)]
-  plottingData[wk>=max(wk)-2,true_nbc:=NA]
-  plottingData[,max_wk:=max(wk,na.rm=T),by=.(DoA)]
-  plottingData[,lag:=max_wk-wk]
-  plottingData[,nbc_bias:=nbc-true_nbc]
-  plottingData[nbc==0 & true_nbc>10,nbc_bias:=NA]
 
   q <- ggplot(plottingData[lag<=7],aes(x=factor(lag),y=nbc_bias))
   q <- q + geom_boxplot()
@@ -227,28 +211,15 @@ GraphBias2 <- function(plotData,titleBias){
 }
 
 GraphBiasVsZScore <- function(plotData,titleBias){
-  plottingData <- plotData[wk>=max(wk)-52*2]
+  plottingData <- plotData[wk>=max(wk)-52*4]
 
   breaks <- unique(plottingData[,c("WoDi","YoDi","wk"),with=FALSE])
   breaks <- breaks[seq(1,nrow(breaks),4)]
   breaks[, label := paste(gsub(" ","0",format(WoDi,width=2)),"/",YoDi,sep="")]
 
-  plottingData[DoA==max(DoA),true_nbc:=nbc]
-  plottingData[,true_nbc:=mean(true_nbc,na.rm=T),by=.(wk)]
-  plottingData[wk>=max(wk)-2,true_nbc:=NA]
-
-  plottingData[DoA==max(DoA),true_zscore:=zscore]
-  plottingData[,true_zscore:=mean(true_zscore,na.rm=T),by=.(wk)]
-  plottingData[wk>=max(wk)-2,true_zscore:=NA]
-
-  plottingData[,max_wk:=max(wk,na.rm=T),by=.(DoA)]
-  plottingData[,lag:=max_wk-wk]
-  plottingData[,nbc_bias:=nbc-true_nbc]
-  plottingData[nbc==0 & true_nbc>10,nbc_bias:=NA]
-
   plottingData[,lagLabel:=sprintf("Lag %s weeks",lag)]
 
-  q <- ggplot(plottingData[lag<=3],aes(x=true_zscore,y=nbc_bias))
+  q <- ggplot(plottingData[lag<=5],aes(x=true_zscore,y=nbc_bias))
   #q <- q + geom_vline(xintercept=max(plottingData$wk),colour="red")
   q <- q + geom_point()
   q <- q + stat_smooth(method="lm",se=F,colour="red")
@@ -260,10 +231,85 @@ GraphBiasVsZScore <- function(plotData,titleBias){
   return(q)
 }
 
+GraphBiasVsZScore <- function(plotData,titleBias){
+  plottingData <- copy(plotData)
+
+  breaks <- unique(plottingData[,c("WoDi","YoDi","wk"),with=FALSE])
+  breaks <- breaks[seq(1,nrow(breaks),4)]
+  breaks[, label := paste(gsub(" ","0",format(WoDi,width=2)),"/",YoDi,sep="")]
+
+  plottingData[,lagLabel:=sprintf("Lag %s weeks",lag)]
+
+  q <- ggplot(plottingData[lag<=5],aes(x=true_zscore,y=nbc_bias))
+  #q <- q + geom_vline(xintercept=max(plottingData$wk),colour="red")
+  q <- q + geom_point()
+  q <- q + stat_smooth(method="lm",se=F,colour="red")
+  q <- q + facet_grid(delayVersion~lagLabel)
+  q <- q + scale_x_continuous("Z Score")
+  q <- q + scale_y_continuous("Bias in adjusted number of deaths")
+  q <- q + labs(title="Bias")
+  q <- q + theme_gray(base_size=18)
+  return(q)
+}
+
+GraphsSeasons <- function(plotData){
+  plotData[,seasonType:="Winter"]
+  plotData[WoDi %in% c(21:39),seasonType:="Summer"]
+
+  plotData[,season:=sprintf("%s",YoDi)]
+  plotData[seasonType=="Winter" & WoDi>=40,season:=sprintf("%s/%s",YoDi,YoDi+1)]
+  plotData[seasonType=="Winter" & WoDi<=20,season:=sprintf("%s/%s",YoDi-1,YoDi)]
+
+  plotData <- plotData[WoDi %in% 1:52]
+  minWinter <- min(plotData[seasonType=="Winter"]$season)
+  minSummer <- min(plotData[seasonType=="Summer"]$season)
+  plotData <- plotData[!season %in% c(minWinter,minSummer)]
+
+  plotData[,WoDiInsideSeason:=1:.N,by=season]
+
+  plotData[,cumExcess:=cumsum(excess),by=season]
+  plotData[,cumDeaths:=cumsum(nbc),by=season]
+
+  plotData[,maxWoDiInsideSeason:=max(WoDiInsideSeason),by=season]
+
+  lastYear <- plotData[.N]$YoDi
+  lastWeek <- plotData[.N]$WoDi
+  lastWeekInsideSeason <- plotData[.N]$WoDiInsideSeason
+  plotData[,categoryOfWeekStatus:=ifelse(WoDiInsideSeason<=lastWeekInsideSeason,
+                                         sprintf("Up to week %s",lastWeek),
+                                         sprintf("After week %s",lastWeek))]
+
+  breaks <- unique(plotData[seasonType=="Winter",c("WoDi","WoDiInsideSeason")])
+  setorder(breaks,WoDiInsideSeason)
+  q <- ggplot(plotData[seasonType=="Winter"],aes(x=WoDiInsideSeason,y=cumExcess,colour=season))
+  q <- q + geom_line()
+  q <- q + geom_line(data=plotData[seasonType=="Winter" & season==max(season)],lwd=2)
+  q <- q + geom_point(data=plotData[seasonType=="Winter" & season==max(season)],size=4)
+  q <- q + scale_color_brewer("Season",palette="Set1",direction = -1)
+  q <- q + scale_x_continuous("Weeks",breaks=breaks$WoDiInsideSeason,labels=breaks$WoDi)
+  q1 <- q
+  q1
+
+  q <- ggplot(plotData[seasonType=="Summer"],aes(x=WoDi,y=cumExcess,colour=season))
+  q <- q + geom_line()
+  q <- q + geom_line(data=plotData[seasonType=="Summer" & season==max(season)],lwd=2)
+  q <- q + geom_point(data=plotData[seasonType=="Summer" & season==max(season)],size=4)
+  q <- q + scale_color_brewer("Season",palette="Set1",direction = -1)
+  q1 <- q
+  q1
+
+  q <- ggplot(plotData[seasonType=="Summer"],aes(
+    x=season,
+    y=nbc,
+    fill=categoryOfWeekStatus
+    ))
+  q2 <- q + geom_bar(stat="identity")
+  q2
+}
+
 #' Running graphs
 #' @param runName Name
 #' @param data data
-#' @param allPlotData allPlotData
 #' @param folder a
 #' @param yearWeek a
 #' @param dateData a
@@ -277,7 +323,6 @@ GraphBiasVsZScore <- function(plotData,titleBias){
 #' @export RunGraphsDeaths
 RunGraphsDeaths <- function(runName="Norway",
                             data,
-                            allPlotData,
                             folder=fhi::DashboardFolder("results",file.path(RAWmisc::YearWeek(),"Graphs")),
                             yearWeek=RAWmisc::YearWeek(),
                             dateData=Sys.time(),
@@ -351,30 +396,66 @@ RunGraphsDeaths <- function(runName="Norway",
     RAWmisc::saveA4(q,filename=paste0(folder,"/incl_reported_",runName,"-",i,"-", yearWeek,".png"))
 
 
-    q <- gridExtra::grid.arrange(
-      GraphTogether(data=data[GROUP==i],
-                    title1a=title1a,
-                    title1b=title1b,
-                    title2=title2,
-                    includeRealDeaths=TRUE,
-                    dateData=dateData,
-                    dateReliable=dateReliable
-      ),
-      ncol=1,
-      newpage=F,
-      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
-    )
-    RAWmisc::saveA4(q,filename=paste0(folder,"/both_reported_",runName,"-",i,"-", yearWeek,".png"),landscape=F)
+    # q <- gridExtra::grid.arrange(
+    #   GraphTogether(data=data[GROUP==i],
+    #                 title1a=title1a,
+    #                 title1b=title1b,
+    #                 title2=title2,
+    #                 includeRealDeaths=TRUE,
+    #                 dateData=dateData,
+    #                 dateReliable=dateReliable
+    #   ),
+    #   ncol=1,
+    #   newpage=F,
+    #   bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
+    # )
+    # RAWmisc::saveA4(q,filename=paste0(folder,"/both_reported_",runName,"-",i,"-", yearWeek,".png"),landscape=F)
 
   }
 
+}
+
+GraphPercentRecorded <- function(plotData){
+  dv <- plotData$delayVersion[1]
+  plottingData <- plotData[delayVersion==dv]
+
+  plottingData <- plottingData[,.(perc=nb/true_nbc*100),by=.(lag,DoA)]
+  plottingData[,lagLabel:=sprintf("Lag %s weeks",lag)]
+
+  q <- ggplot(plottingData[lag<=9],aes(x=lagLabel,y=perc))
+  #q <- q + geom_vline(xintercept=max(plottingData$wk),colour="red")
+  q <- q + geom_boxplot()
+  q <- q + scale_x_discrete("Weeks lag")
+  q <- q + scale_y_continuous("Percent of deaths recorded")
+  #q <- q + labs(title="Bias")
+  q <- q + theme_gray(base_size=18)
+  return(q)
+}
+
+GraphNPVPPV <- function(plotData,titleBias){
+  plottingData <- copy(plotData)
+
+  plottingData <- plottingData[lag <= 9,.(
+    ppv2=PPV(test_results2)*100,
+    npv2=NPV(test_results2)*100,
+    ppv4=PPV(test_results4)*100,
+    npv4=NPV(test_results4)*100
+  ),keyby=.(lag,delayVersion)]
+
+  plottingData <- melt.data.table(plottingData,id=c("lag","delayVersion"))
+  plottingData[,lagLabel:=sprintf("Lag %s weeks",lag)]
+
+  q <- ggplot(plottingData[is.finite(value)],aes(x=lagLabel,y=value,fill=delayVersion))
+  q <- q + geom_bar(stat="identity",pos="dodge",width=0.5)
+  q <- q + facet_wrap(~variable,ncol=1)
+  q <- q + theme_gray(base_size=18)
+  return(q)
 }
 
 
 
 #' Running graphs
 #' @param runName Name
-#' @param data data
 #' @param allPlotData allPlotData
 #' @param folder a
 #' @param yearWeek a
@@ -387,7 +468,6 @@ RunGraphsDeaths <- function(runName="Norway",
 #' @importFrom grDevices dev.off
 #' @export RunGraphsStatistics
 RunGraphsStatistics <- function(runName="Norway",
-                            data,
                             allPlotData,
                             folder=fhi::DashboardFolder("results",file.path(RAWmisc::YearWeek(),"Graphs")),
                             yearWeek=RAWmisc::YearWeek(),
@@ -395,84 +475,91 @@ RunGraphsStatistics <- function(runName="Norway",
 
   #### NORWEGIAN
 
-  storedData <- list()
-  if(runName=="Norway"){
-    runList <- c("Total","0to4","5to14","15to64","65P")
-  } else runList <- "Total"
 
-  for(i in runList){
-    if(i=="Total"){
-      title1 <- "Totalt antall d\u00F8de per uke siste \u00E5r"
-      title1a <- "Totalt antall d\u00F8de per uke siste \u00E5r (med rapporterte d\u00F8dsfall)"
-      title1b <- "Totalt antall d\u00F8de per uke siste \u00E5r (uten rapporterte d\u00F8dsfall)"
-      title2 <- "Totalt antall d\u00F8de per uke siste 5 \u00E5r"
-      titleBias <- "Bias i korrigering av totalt antall d\u00F8de per uke siste"
-    } else if(i=="0to4"){
-      title1 <- "Antall d\u00F8de (0-4 \u00E5r) per uke siste \u00E5r"
-      title1a <- "Antall d\u00F8de (0-4 \u00E5r) per uke siste \u00E5r (med rapporterte d\u00F8dsfall)"
-      title1b <- "Antall d\u00F8de (0-4 \u00E5r) per uke siste \u00E5r (uten rapporterte d\u00F8dsfall)"
-      title2 <- "Antall d\u00F8de (0-4 \u00E5r) per uke siste 5 \u00E5r"
-      titleBias <- "Bias i korrigering av antall d\u00F8de (0-4 \u00E5r) per uke"
-    } else if(i=="5to14"){
-      title1 <- "Antall (5-14 \u00E5r) d\u00F8de per uke siste \u00E5r"
-      title1a <- "Antall (5-14 \u00E5r) d\u00F8de per uke siste \u00E5r (med rapporterte d\u00F8dsfall)"
-      title1b <- "Antall (5-14 \u00E5r) d\u00F8de per uke siste \u00E5r (uten rapporterte d\u00F8dsfall)"
-      title2 <- "Antall (5-14 \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
-      titleBias <- "Bias i korrigering av antall d\u00F8de (5-14 \u00E5r) per uke"
-    } else if(i=="15to64"){
-      title1 <- "Antall (15-64 \u00E5r) d\u00F8de per uke siste \u00E5r"
-      title1a <- "Antall (15-64 \u00E5r) d\u00F8de per uke siste \u00E5r (med rapporterte d\u00F8dsfall)"
-      title1b <- "Antall (15-64 \u00E5r) d\u00F8de per uke siste \u00E5r (uten rapporterte d\u00F8dsfall)"
-      title2 <- "Antall (15-64 \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
-      titleBias <- "Bias i korrigering av antall d\u00F8de (15-64 \u00E5r) per uke"
-    } else if(i=="65P"){
-      title1 <- "Antall (65+ \u00E5r) d\u00F8de per uke siste \u00E5r"
-      title1a <- "Antall (65+ \u00E5r) d\u00F8de per uke siste \u00E5r (med rapporterte d\u00F8dsfall)"
-      title1b <- "Antall (65+ \u00E5r) d\u00F8de per uke siste \u00E5r (uten rapporterte d\u00F8dsfall)"
-      title2 <- "Antall (65+ \u00E5r) d\u00F8de per uke siste 5 \u00E5r"
-      titleBias <- "Bias i korrigering av antall d\u00F8de (65+ \u00E5r) per uke"
-    }
+  plotData <- copy(allPlotData)
+  plotData[,max_wk:=max(wk,na.rm=T),by=.(DoA,GROUP)]
+  plotData[,lag:=max_wk-wk]
 
-    # only plot bias for norway (i.e. when we ran the historical data)
-    if(length(unique(allPlotData$DoA))>1){
-      plotData <- allPlotData[GROUP==i & !is.na(excess)]
-      q <- gridExtra::grid.arrange(
-        GraphPreviousWeeks(plotData=plotData,
-                           title=title1
-        ),
-        ncol=1,
-        newpage=F,
-        bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
-      )
-      RAWmisc::saveA4(q,filename=paste0(folder,"/previous_",runName,"-",i,"-", yearWeek,".png"))
+  plotData[DoA==max(DoA),true_nbc:=nbc]
+  plotData[,true_nbc:=mean(true_nbc,na.rm=T),by=.(wk,GROUP)]
+  plotData[wk>=max(wk)-10,true_nbc:=NA]
 
-      plotData <- allPlotData[GROUP==i]
-      q <- gridExtra::grid.arrange(
-        GraphBias1(plotData=plotData,
-                   titleBias=titleBias
-        ),
-        GraphBias2(plotData=plotData,
-                   titleBias=titleBias
-        ),
-        ncol=1,
-        newpage=F,
-        bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
-      )
-      RAWmisc::saveA4(q,filename=paste0(folder,"/bias_",runName,"-",i,"-", yearWeek,".png"))
+  plotData[,nbc_bias:=nbc-true_nbc]
+  plotData[nbc==0 & true_nbc>10,nbc_bias:=NA]
 
-      plotData <- allPlotData[GROUP==i]
-      q <- gridExtra::grid.arrange(
-        GraphBiasVsZScore(plotData=plotData,
-                          title=title1
-        ),
-        ncol=1,
-        newpage=F,
-        bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
-      )
-      RAWmisc::saveA4(q,filename=paste0(folder,"/zscore_",runName,"-",i,"-", yearWeek,".png"))
-    }
+  plotData[DoA==max(DoA),true_zscore:=zscore]
+  plotData[,true_zscore:=mean(true_zscore,na.rm=T),by=.(wk,GROUP)]
+  plotData[wk>=max(wk)-10,true_zscore:=NA]
 
+  plotData[,truePos2:=true_zscore>2]
+  plotData[,testPos2:=zscore>2]
+
+  plotData[,test_results2:=as.character(NA)]
+  plotData[truePos2==TRUE & testPos2==TRUE, test_results2:="TP"]
+  plotData[truePos2==FALSE & testPos2==FALSE, test_results2:="TN"]
+  plotData[truePos2==FALSE & testPos2==TRUE, test_results2:="FP"]
+  plotData[truePos2==TRUE & testPos2==FALSE, test_results2:="FN"]
+
+  plotData[,truePos4:=true_zscore>4]
+  plotData[,testPos4:=zscore>4]
+
+  plotData[,test_results4:=as.character(NA)]
+  plotData[truePos4==TRUE & testPos4==TRUE, test_results4:="TP"]
+  plotData[truePos4==FALSE & testPos4==FALSE, test_results4:="TN"]
+  plotData[truePos4==FALSE & testPos4==TRUE, test_results4:="FP"]
+  plotData[truePos4==TRUE & testPos4==FALSE, test_results4:="FN"]
+
+  for(i in unique(plotData$delayVersion)){
+    q <- gridExtra::grid.arrange(
+      GraphPreviousWeeks(plotData=plotData[delayVersion==i],
+                         title="Totalt antall d\u00F8de per uke siste \u00E5r"
+      ),
+      ncol=1,
+      newpage=F,
+      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
+    )
+    RAWmisc::saveA4(q,filename=paste0(folder,"/previous_",i,"-",runName,"-",i,"-", yearWeek,".png"))
+
+    q <- gridExtra::grid.arrange(
+      GraphBias1(plotData=plotData[delayVersion==i],
+                 titleBias="Bias i korrigering av totalt antall d\u00F8de per uke siste"
+      ),
+      GraphBias2(plotData=plotData[delayVersion==i],
+                 titleBias="Bias i korrigering av totalt antall d\u00F8de per uke siste"
+      ),
+      ncol=1,
+      newpage=F,
+      bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
+    )
+    RAWmisc::saveA4(q,filename=paste0(folder,"/bias_",i,"-",runName,"-",i,"-", yearWeek,".png"))
   }
 
+  q <- gridExtra::grid.arrange(
+    GraphBiasVsZScore(plotData=plotData,
+                      title="Totalt antall d\u00F8de per uke siste \u00E5r"
+    ),
+    ncol=1,
+    newpage=F,
+    bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
+  )
+  RAWmisc::saveA4(q,filename=paste0(folder,"/zscore_",runName,"-", yearWeek,".png"))
+
+  q <- gridExtra::grid.arrange(
+    GraphPercentRecorded(plotData=plotData
+    ),
+    ncol=1,
+    newpage=F,
+    bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
+  )
+  RAWmisc::saveA4(q,filename=paste0(folder,"/perc_recorded_",runName,"-", yearWeek,".png"))
+
+  q <- gridExtra::grid.arrange(
+    GraphNPVPPV(plotData=plotData
+    ),
+    ncol=1,
+    newpage=F,
+    bottom = RAWmisc::FootnoteGridArrange(paste("Sist oppdatert: ",strftime(dateData,format="%d/%m/%Y"),sep=""))
+  )
+  RAWmisc::saveA4(q,filename=paste0(folder,"/npvppv_",runName,"-", yearWeek,".png"))
 
 }

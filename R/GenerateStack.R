@@ -65,9 +65,10 @@ GenerateStack <- function(
 
   stack$MOMOYsum <- RAWmisc:::YearN(dateDataMinusOneWeek)
   stack$dateDataMinusOneWeek <- dateDataMinusOneWeek
-  stack$dateData <- vector("list",length=nrow(stack))
-  stack$dateData[[1]] <- c(dateData-seq(4*52*7,0,by=-7))
-  for(i in 1:nrow(stack)) stack$dateData[[i]] <- dateData
+  stack$dateData <- dateData
+  #stack$dateData[[1]] <- c(dateData-seq(4*52*7,0,by=-7))
+  #stack$dateData[[1]] <- c(dateData-seq(4*52*7,0,by=-7))
+  #for(i in 1:nrow(stack)) stack$dateData[[i]] <- dateData
 
   tmp <- list(
     list(
@@ -101,5 +102,19 @@ GenerateStack <- function(
   }
   stack$MOMOmodels <- tmp
 
-  return(stack)
+  stackStatistics <- stack[2,]
+  stackStatistics$runName <- "Norway"
+  res <- vector("list",length=length(CONFIG$HISTORICAL_DELAY_VERSIONS))
+  for(i in 1:length(res)){
+    df1 <- stackStatistics[rep(row.names(stackStatistics), length(CONFIG$HISTORICAL_ANALYSES)),]
+    df1$dateData <- as.Date(df1$dateData-CONFIG$HISTORICAL_ANALYSES,origin="1970-01-01")
+    df1$delayVersion <- CONFIG$HISTORICAL_DELAY_VERSIONS[i]
+    res[[i]] <- df1
+  }
+  res <- rbindlist(res)
+
+  return(list(
+    stackAnalyses=stack,
+    stackStatistics=res
+  ))
 }
