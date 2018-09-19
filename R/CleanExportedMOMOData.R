@@ -25,6 +25,7 @@ CleanExportedMOMOData <- function(
   data[,id:=paste0(GROUP,wk,wk2)]
   data[,wk2:=as.character(wk2)]
 
+  nam <- names(data)
   if(s[["runName"]]=="Norway"){
     if(file.exists(file.path(folder_results,"censoring.RDS"))){
       oldCensoring <- readRDS(file.path(folder_results,"censoring.RDS"))
@@ -36,7 +37,10 @@ CleanExportedMOMOData <- function(
     saveRDS(data,file.path(folder_results,"censoring.RDS"))
     data[,nbc:=fhi::Censor(n=nbc,randomNoise=randomNoise,boundaries=list(data$UPIb2,data$UPIb4))]
     data[,nb:=fhi::Censor(n=nb,randomNoise=randomNoise,boundaries=list(data$UPIb2,data$UPIb4))]
+    data[,randomNoise:=NULL]
   }
+  setcolorder(data,nam)
+
   minCorrectedWeek <- min(data[nbc!=nb]$wk)
 
   # prediction interval
