@@ -4,13 +4,13 @@
 \alias{GetData}
 \title{GetData}
 \usage{
-GetData(folder_raw = fhi::DashboardFolder("data_raw"), fClean, f,
+GetData(folder_raw = fhi::DashboardFolder("data_raw"), fDone, f,
   forceRun = FALSE)
 }
 \arguments{
 \item{folder_raw}{a}
 
-\item{fClean}{a}
+\item{fDone}{a}
 
 \item{f}{a}
 

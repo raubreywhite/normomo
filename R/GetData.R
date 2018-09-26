@@ -1,3 +1,14 @@
+#' test
+#' @param data_clean a
+#' @param f a
+#' @import fhi
+#' @export CreateLatestDoneFile
+CreateLatestDoneFile <- function(data_clean=fhi::DashboardFolder("data_clean"),f){
+  file = file.path(data_clean,sprintf("done_%s.txt",f))
+  try(file.create(file),TRUE)
+  #try(file.create(paste0("data_clean/done_",LatestRawID(),".txt")),TRUE)
+}
+
 #' GetDataInfo
 #' @param folder_raw a
 #' @param folder_clean a
@@ -9,12 +20,12 @@ GetDataInfo <- function(
   folder_clean=fhi::DashboardFolder("data_clean")
   ){
 
-  f <- list.files(folder_clean,"data_")
-  f <- gsub("data_","",f)
-  f <- gsub(".RDS$","",f)
+  f <- list.files(folder_clean,"done_")
+  f <- gsub("done_","",f)
+  f <- gsub(".txt$","",f)
   if(length(f)>0){
-    fClean <- max(f)
-  } else fClean <- ""
+    fDone <- max(f)
+  } else fDone <- ""
 
   f <- list.files(folder_raw,"FHIDOD2")
   f <- gsub("FHIDOD2_","",f)
@@ -24,7 +35,7 @@ GetDataInfo <- function(
   dateDataMinusOneWeek <- dateData - 7
 
   return(list(
-    fClean=fClean,
+    fDone=fDone,
     f=f,
     dateData=dateData,
     dateDataMinusOneWeek=dateDataMinusOneWeek
@@ -34,7 +45,7 @@ GetDataInfo <- function(
 
 #' GetData
 #' @param folder_raw a
-#' @param fClean a
+#' @param fDone a
 #' @param f a
 #' @param forceRun a
 #' @importFrom fhi DashboardFolder
@@ -43,11 +54,11 @@ GetDataInfo <- function(
 #' @export GetData
 GetData <- function(
   folder_raw=fhi::DashboardFolder("data_raw"),
-  fClean,
+  fDone,
   f,
   forceRun=FALSE){
 
-  if(fClean==f & !forceRun){
+  if(fDone==f & !forceRun){
     cat(sprintf("%s/%s/R/NORMOMO No new data",Sys.time(),Sys.getenv("COMPUTER")),"\n")
     quit(save="no", status=0)
   } else if(!RAWmisc::IsFileStable(file.path(folder_raw,paste0("FHIDOD2_",f,".txt")))){
