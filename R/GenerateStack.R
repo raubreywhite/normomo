@@ -45,16 +45,10 @@ GenerateStack <- function(
     paste0(stack$runName,".RDS")
   )
 
-  stack$MOMOFolderResultsGraphsDeleteUnreliable <- file.path(
+  stack$MOMOFolderResultsGraphsStatus <- file.path(
     folder_results,
     RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "graphs_delete_unreliable"
-  )
-
-  stack$MOMOFolderResultsGraphsWithUnreliable <- file.path(
-    folder_results,
-    RAWmisc::YearWeek(dateDataMinusOneWeek),
-    "graphs_with_unreliable"
+    "graphs_status"
   )
 
   stack$MOMOFolderResultsGraphsStatistics <- file.path(

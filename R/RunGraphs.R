@@ -62,7 +62,7 @@ GraphTogether <- function(
   breaks <- rbind(breaksTop[,c("wk","label")],breaksBottom[,c("wk","label")])
 
   if(norwegian){
-    filllabels1=c("Forsinket data","Prediksjonsintervall","Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
+    filllabels1=c("Prediksjonsintervall","Betydelig h\u00F8yere enn forventet","H\u00F8yere enn forventet","Forventet","Lavere enn forventet")
     shapelabels=c("Forel\u00F8pig")
     colourlabels=c("Korrigert for forsinkelse","Rapporterte d\u00F8dsfall")
     ylabel="Antall d\u00F8de per uke"
@@ -75,13 +75,11 @@ GraphTogether <- function(
   }
 
   q <- ggplot(plottingData[wk2<=RAWmisc::YearWeek(dateReliable)], aes(x=wkSplit))
-  q <- q + geom_ribbon(data=plottingData[wk2>=RAWmisc::YearWeek(dateReliable)],mapping=aes(ymin=-Inf,ymax=Inf,fill="0late"),alpha=0.7)
-  #q <- q + geom_ribbon(data=plottingData[wk2>=RAWmisc::YearWeek(dateReliable)],mapping=aes(ymin=-Inf,ymax=Inf),fill="#b2df8a")
   q <- q + geom_ribbon(aes(ymin=-Inf,ymax=Lower, fill="5lower"),alpha=0.7)
   q <- q + geom_ribbon(aes(ymin=Lower,ymax=UPIb2, fill="4expected"),alpha=0.7)
   q <- q + geom_ribbon(aes(ymin=UPIb2,ymax=UPIb4, fill="3high"),alpha=0.7)
   q <- q + geom_ribbon(aes(ymin=UPIb4,ymax=Inf, fill="2veryhigh"),alpha=0.7)
-  q <- q + geom_ribbon(data=plottingData[wk2<=RAWmisc::YearWeek(dateReliable) & type=="top"],mapping=aes(ymin=LPIc,ymax=UPIc, fill="1predinterval"),alpha=0.3)
+  q <- q + geom_ribbon(data=plottingData[wk2<=RAWmisc::YearWeek(dateReliable)  & unstableEstimates=="Unstable" & type=="top"],mapping=aes(ymin=LPIc,ymax=UPIc, fill="1predinterval"),alpha=0.3)
   if(includeRealDeaths) q <- q + geom_line(data=plottingData[wk2<=RAWmisc::YearWeek(dateReliable) & titlex %in% c(title1,title1a)],mapping=aes(y=nb,colour="Rapporterte"),lwd=0.5)
   q <- q + geom_line(aes(y=nbc,colour="Korrigert"),lwd=0.5)
   q <- q + geom_point(data=plottingData[wk2<=RAWmisc::YearWeek(dateReliable) & unstableEstimates=="Unstable"],aes(y=nbc,shape="Usikkert"),size=2)
@@ -90,7 +88,7 @@ GraphTogether <- function(
   q <- q + scale_x_continuous("",breaks=breaks$wk, labels=breaks$label)
   q <- q + scale_y_continuous(ylabel)
   q <- q + scale_fill_manual("",
-                             values=c("0late"="#b2df8a","1predinterval"="#636363","2veryhigh"="#fc8d59","3high"="#ffffbf","4expected"="#91bfdb","5lower"="white"),
+                             values=c("1predinterval"="#636363","2veryhigh"="#fc8d59","3high"="#ffffbf","4expected"="#91bfdb","5lower"="white"),
                              labels=filllabels1)
   q <- q + scale_shape_manual("",
                               values=c("Usikkert"=16),
@@ -100,6 +98,8 @@ GraphTogether <- function(
                                labels=colourlabels)
   q <- q + theme_gray(base_size=18)
   q <- q + theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.5))
+  #q <- q + theme(panel.grid.major = element_line(colour = "white"),
+  #               panel.grid.minor = element_line(colour = "white", size = 0.25))
   q <- q + guides(fill = guide_legend(title.position="top", reverse=F, order=1, ncol=1))
   q <- q + guides(colour = guide_legend(title.position="top", reverse=F, order=2, ncol=1))
   q <- q + guides(shape = guide_legend(title.position="top", reverse=F, order=3, ncol=1))
@@ -508,6 +508,10 @@ RunGraphsStatistics <- function(runName="Norway",
   plotData[truePos4==FALSE & testPos4==FALSE, test_results4:="TN"]
   plotData[truePos4==FALSE & testPos4==TRUE, test_results4:="FP"]
   plotData[truePos4==TRUE & testPos4==FALSE, test_results4:="FN"]
+
+  print(with(plotData[lag==0],xtabs(~test_results2+delayVersion)))
+  print(with(plotData[lag==1],xtabs(~test_results2+delayVersion)))
+  print(with(plotData[lag==2],xtabs(~test_results2+delayVersion)))
 
   for(i in unique(plotData$delayVersion)){
     q <- gridExtra::grid.arrange(
